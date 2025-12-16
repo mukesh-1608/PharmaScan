@@ -98,7 +98,7 @@ export default function Home() {
     setProcessing(true);
     setCurrentStep(2);
 
-    let successCount = 0; // Track successes to decide whether to show success toast
+    let successCount = 0;
 
     for (const image of pendingImages) {
       setUploadedImages((prev) =>
@@ -113,7 +113,6 @@ export default function Home() {
         const formData = new FormData();
         formData.append("image", image.file);
 
-        // Call the new Server-Side Pipeline (AWS + Gemini)
         const response = await fetch("/api/process-image", {
           method: "POST",
           body: formData,
@@ -133,13 +132,12 @@ export default function Home() {
                   ...img,
                   status: "complete" as const,
                   progress: 100,
-                  rawText: data.rawText, // Raw text from Textract
+                  rawText: data.rawText, 
                 }
               : img
           )
         );
 
-        // Accumulate XML output from Gemini
         setXmlOutput((prev) => (prev ? prev + "\n" + data.xml : data.xml));
         successCount++;
 
@@ -162,11 +160,9 @@ export default function Home() {
 
     setProcessing(false);
     
-    // Only show success and advance steps if at least one image worked
     if (successCount > 0) {
         setCompletedSteps((prev) => Array.from(new Set([...prev, 2, 3, 4])));
         setCurrentStep(4);
-        
         toast({
             title: "Processing Complete",
             description: `XML generated successfully for ${successCount} file(s).`,
@@ -177,7 +173,7 @@ export default function Home() {
 
   const handleDownloadXML = useCallback(() => {
     if (!xmlOutput) return;
-    downloadFile(xmlOutput, "medical_records.xml", "application/xml");
+    downloadFile(xmlOutput, "RxSync_Data.xml", "application/xml");
     toast({ title: "Downloaded", description: "XML file saved." });
   }, [xmlOutput, toast]);
 
@@ -195,12 +191,12 @@ export default function Home() {
               <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center" data-testid="logo">
                 <Scan className="w-5 h-5 text-primary-foreground" />
               </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground" data-testid="text-app-title">
-                  PharmaScan AI
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-bold text-foreground leading-none" data-testid="text-app-title">
+                  RxSync
                 </h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">
-                  AWS Textract + Gemini Pipeline
+                <p className="text-xs text-muted-foreground italic mt-1">
+                  Built by Juara IT Solutions
                 </p>
               </div>
             </div>
@@ -299,8 +295,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* Step 3 & 4: XML Output */}
-          {/* Note: We skip the manual table review step because Gemini returns final XML directly */}
+          {/* Step 3: XML Output */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -335,7 +330,7 @@ export default function Home() {
       <footer className="border-t mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-sm text-muted-foreground text-center">
-            PharmaScan AI - Powered by AWS & Google Gemini
+            RxSync — Powered by Juara IT Solutions
           </p>
         </div>
       </footer>
